@@ -30,6 +30,14 @@ contract("VoteHandler", function () {
     it("should not accept vote", async function () {
       await assertRejects(() => instance.vote("A"));
     });
+
+    it("should fails to return stats", async function () {
+      await assertRejects(() => instance.getStats("test"));
+    });
+
+    it("should fails get options", async function () {
+      await assertRejects(() => instance.getCurrentOptions());
+    });
   });
 
   describe("with active poll", () => {
@@ -65,6 +73,10 @@ contract("VoteHandler", function () {
 
     it("should accept vote", async function () {
       await instance.vote("A");
+    });
+
+    it("should return current poll name", async () => {
+      assert.equal(await instance.getCurrentPollName(), "test");
     });
 
     it("should throw an error if stats requested for non-existing poll", async () => {
