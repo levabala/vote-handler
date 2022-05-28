@@ -40,19 +40,22 @@ contract("VoteHandler", function () {
     });
   });
 
-  describe("with active poll", () => {
-    const optionsExpected = ["A", "B", "C"];
-
+  describe("with one active poll", () => {
     beforeEach(async () => {
-      await instance.startPoll("test", optionsExpected);
+      await instance.startPoll("test", ["A", "B", "C"]);
     });
 
     it("should have the same options as passed", async () => {
-      assert.deepEqual(await instance.getCurrentOptions(), optionsExpected);
+      assert.deepEqual(await instance.getCurrentOptions(), ["A", "B", "C"]);
     });
 
     it("should not allow to start new poll", async () => {
       await assertRejects(() => instance.startPoll("test2", ["A", "B"]));
+    });
+
+    it("should start new poll if active is paused", async () => {
+      await instance.pausePoll();
+      await instance.startPoll("test2", ["A", "B", "C", "D"]);
     });
 
     it("should be active", async () => {
@@ -90,8 +93,43 @@ contract("VoteHandler", function () {
 
       const { "0": options, "1": votes } = await instance.getStats("test");
 
-      assert.deepEqual(options, optionsExpected);
+      assert.deepEqual(options, ["A", "B", "C"]);
       assert.deepEqual(votes, [2, 1, 0].map(web3.utils.toBN));
+    });
+  });
+
+  describe("with completed poll and active one", () => {
+    beforeEach(async () => {
+      await instance.startPoll("test", ["A", "B", "C"]);
+
+      await instance.vote("A");
+      await instance.vote("A");
+      await instance.vote("B");
+
+      await instance.pausePoll();
+
+      await instance.startPoll("test2", ["A", "B", "C", "D"]);
+    });
+
+    it("should be able to access old stats", async () => {
+      // access first poll's stats
+      const { "0": options, "1": votes } = await instance.getStats("test");
+
+      assert.deepEqual(options, ["A", "B", "C"]);
+      assert.deepEqual(votes, [2, 1, 0].map(web3.utils.toBN));
+    });
+
+    it("should be able to access new stats", async () => {
+      // second poll actions
+      await instance.vote("B");
+      await instance.vote("B");
+      await instance.vote("D");
+
+      // access first poll's stats
+      const { "0": options, "1": votes } = await instance.getStats("test2");
+
+      assert.deepEqual(options, ["A", "B", "C", "D"]);
+      assert.deepEqual(votes, [0, 2, 0, 1].map(web3.utils.toBN));
     });
   });
 });
