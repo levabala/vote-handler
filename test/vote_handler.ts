@@ -15,27 +15,27 @@ contract("VoteHandler", function () {
   });
 
   describe("with no polls", () => {
-    it("should start a poll without errors", async function () {
+    it("should start a poll", async function () {
       await instance.startPoll("test", ["A", "B"]);
     });
 
-    it("should throw an error if resume", async function () {
+    it("should fail if resume", async function () {
       await assertRejects(() => instance.resumePoll());
     });
 
-    it("should throw an error if pause", async function () {
+    it("should fail if pause", async function () {
       await assertRejects(() => instance.pausePoll());
     });
 
-    it("should not accept vote", async function () {
+    it("should fail to accept vote", async function () {
       await assertRejects(() => instance.vote("A"));
     });
 
-    it("should fails to return stats", async function () {
+    it("should fail to return stats", async function () {
       await assertRejects(() => instance.getStats("test"));
     });
 
-    it("should fails get options", async function () {
+    it("should fail get options", async function () {
       await assertRejects(() => instance.getCurrentOptions());
     });
   });
@@ -75,7 +75,7 @@ contract("VoteHandler", function () {
       assert.isTrue(await instance.isPollActive());
     });
 
-    it("should not accept vote for the missing option", async function () {
+    it("should fail to accept vote for the missing option", async function () {
       await assertRejects(() => instance.vote("D"));
     });
 
@@ -87,7 +87,7 @@ contract("VoteHandler", function () {
       assert.equal(await instance.getCurrentPollName(), "test");
     });
 
-    it("should throw an error if stats requested for non-existing poll", async () => {
+    it("should fail if stats requested for non-existing poll", async () => {
       await assertRejects(() => instance.getStats("test2"));
     });
 
