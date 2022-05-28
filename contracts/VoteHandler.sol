@@ -12,7 +12,7 @@ contract VoteHandler {
 
   constructor() {}
 
-  // internal functions
+  // internal
   function clearPollCurrentOptions() internal {
     uint256 options_length = polls_options[poll_current_name].length;
 
@@ -21,7 +21,15 @@ contract VoteHandler {
     }
   }
 
-  // external functions
+  function hasOption(string memory option) internal view returns (bool) {
+    return poll_current_options[option];
+  }
+
+  function stringIsEmpty(string memory value) internal pure returns (bool) {
+    return bytes(value).length == 0;
+  }
+
+  // external views
   function isPollActive() external view returns (bool) {
     return poll_current_active;
   }
@@ -30,6 +38,25 @@ contract VoteHandler {
     return poll_current_name;
   }
 
+  function getStats(string calldata name)
+    external
+    view
+    returns (string[] memory options, uint32[] memory votes)
+  {
+    require(!stringIsEmpty(poll_current_name), "No poll exists");
+    require(polls_names[name], "No such poll exists");
+
+    options = polls_options[name];
+    votes = new uint32[](options.length);
+
+    for (uint32 i = 0; i < options.length; i++) {
+      // TODO: check if reading from storage directly is more efficient
+      string memory option = options[i];
+      votes[i] += uint32(polls_votes[name][option].length);
+    }
+  }
+
+  // external payable
   function pausePoll() external payable {
     require(!stringIsEmpty(poll_current_name), "No active poll");
 
@@ -79,34 +106,5 @@ contract VoteHandler {
     require(!stringIsEmpty(poll_current_name), "No poll exists");
 
     return polls_options[poll_current_name];
-  }
-
-  function getStats(string calldata name)
-    external
-    view
-    returns (string[] memory options, uint32[] memory votes)
-  {
-    require(!stringIsEmpty(poll_current_name), "No poll exists");
-    require(polls_names[name], "No such poll exists");
-
-    options = polls_options[name];
-    votes = new uint32[](options.length);
-
-    for (uint32 i = 0; i < options.length; i++) {
-      // TODO: check if reading from storage directly is more efficient
-      string memory option = options[i];
-      votes[i] += uint32(polls_votes[name][option].length);
-    }
-
-    // return (options, votes);
-  }
-
-  // utils
-  function hasOption(string memory option) internal view returns (bool) {
-    return poll_current_options[option];
-  }
-
-  function stringIsEmpty(string memory value) internal pure returns (bool) {
-    return bytes(value).length == 0;
   }
 }
