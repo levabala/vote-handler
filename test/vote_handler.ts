@@ -49,8 +49,13 @@ contract("VoteHandler", function () {
       assert.deepEqual(await instance.getCurrentOptions(), ["A", "B", "C"]);
     });
 
-    it("should not allow to start new poll", async () => {
+    it("should fail to start new poll", async () => {
       await assertRejects(() => instance.startPoll("test2", ["A", "B"]));
+    });
+
+    it("should fail to start new poll with the same name as paused one", async () => {
+      await instance.pausePoll();
+      await assertRejects(() => instance.startPoll("test", ["A", "B"]));
     });
 
     it("should start new poll if active is paused", async () => {
@@ -108,7 +113,7 @@ contract("VoteHandler", function () {
 
       await instance.pausePoll();
 
-      await instance.startPoll("test2", ["A", "B", "C", "D"]);
+      await instance.startPoll("test2", ["B", "C", "D"]);
     });
 
     it("should be able to access old stats", async () => {
@@ -128,8 +133,12 @@ contract("VoteHandler", function () {
       // access first poll's stats
       const { "0": options, "1": votes } = await instance.getStats("test2");
 
-      assert.deepEqual(options, ["A", "B", "C", "D"]);
-      assert.deepEqual(votes, [0, 2, 0, 1].map(web3.utils.toBN));
+      assert.deepEqual(options, ["B", "C", "D"]);
+      assert.deepEqual(votes, [2, 0, 1].map(web3.utils.toBN));
+    });
+
+    it("should fail to access option from old poll", async () => {
+      await assertRejects(() => instance.vote("A"));
     });
   });
 });
