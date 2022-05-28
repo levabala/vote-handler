@@ -67,6 +67,10 @@ contract("VoteHandler", function () {
       await instance.vote("A");
     });
 
+    it("should throw an error if stats requested for non-existing poll", async () => {
+      await assertRejects(() => instance.getStats("test2"));
+    });
+
     it("should return correct stats", async function () {
       await instance.vote("A");
       await instance.vote("A");
