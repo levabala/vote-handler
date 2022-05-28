@@ -17,7 +17,7 @@ contract VoteHandler {
     uint256 options_length = polls_options[poll_current_name].length;
 
     for (uint256 i = 0; i < options_length; i++) {
-      poll_current_options[poll_current_name] = false;
+      poll_current_options[polls_options[poll_current_name][i]] = false;
     }
   }
 
