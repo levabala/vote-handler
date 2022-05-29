@@ -8,7 +8,8 @@
     "start:dev:watch": "ts-node-dev --respawn --transpile-only src/main.ts",
     "types:generate": "typechain --target=truffle-v5 'build/contracts/*.json'",
     "migrate": "tsc -p ./tsconfig.migrate.json --outDir ./migrations && truffle migrate",
-    "test:run": "truffle test",
+    "test": "truffle test",
+    "test:ganache": "ganache-cli -q & truffle test --network development && pkill -f ganache-cli",
     "test:coverage": "truffle run coverage"
   },
   "keywords": [],
@@ -24,6 +25,7 @@
     "@types/chai": "^4.3.1",
     "@types/mocha": "^9.1.1",
     "@types/node": "^17.0.36",
+    "ganache-cli": "^6.12.2",
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "1.0.0-beta.19",
     "solidity-coverage": "0.8.0-beta.1",
